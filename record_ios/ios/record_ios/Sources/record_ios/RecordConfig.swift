@@ -85,34 +85,38 @@ struct IosConfig {
 
   init(map: [String: Any]) {
     let comps = map["categoryOptions"] as? String
-    let options: [AVAudioSession.CategoryOptions]? = comps?.split(separator: ",").compactMap {
-      switch $0 {
-      case "mixWithOthers":
-        AVAudioSession.CategoryOptions.mixWithOthers
-      case "duckOthers":
-        AVAudioSession.CategoryOptions.duckOthers
-      case "allowBluetooth":
-        #if compiler(>=6.2)
-        // For XCode 26.0+, Swift 6.2 version
-        AVAudioSession.CategoryOptions.allowBluetoothHFP
-        #else
-        // Deprecated in 26.0, not 8.0. Thanks Apple!
-        AVAudioSession.CategoryOptions.allowBluetooth
-        #endif
-      case "defaultToSpeaker":
-        AVAudioSession.CategoryOptions.defaultToSpeaker
-      case "interruptSpokenAudioAndMixWithOthers":
-        AVAudioSession.CategoryOptions.interruptSpokenAudioAndMixWithOthers
-      case "allowBluetoothA2DP":
-        AVAudioSession.CategoryOptions.allowBluetoothA2DP
-      case "allowAirPlay":
-        AVAudioSession.CategoryOptions.allowAirPlay
-      case "overrideMutedMicrophoneInterruption":
-        if #available(iOS 14.5, *) { AVAudioSession.CategoryOptions.overrideMutedMicrophoneInterruption } else { nil }
-      default: nil
-      }
-    }
-    self.categoryOptions = options ?? []
+
+    let options = comps?
+      .split(separator: ",")
+      .compactMap { (s: Substring) -> AVAudioSession.CategoryOptions? in
+        switch s {
+        case "mixWithOthers":
+          return .mixWithOthers
+        case "duckOthers":
+          return .duckOthers
+        case "allowBluetooth":
+          #if compiler(>=6.2)
+          return .allowBluetoothHFP
+          #else
+          return .allowBluetooth
+          #endif
+        case "defaultToSpeaker":
+          return .defaultToSpeaker
+        case "interruptSpokenAudioAndMixWithOthers":
+          return .interruptSpokenAudioAndMixWithOthers
+        case "allowBluetoothA2DP":
+          return .allowBluetoothA2DP
+        case "allowAirPlay":
+          return .allowAirPlay
+        case "overrideMutedMicrophoneInterruption":
+          if #available(iOS 14.5, *) { return .overrideMutedMicrophoneInterruption } else { return nil }
+        default:
+          return nil
+        }
+      } ?? []
+
+    self.categoryOptions = options
     self.manageAudioSession = map["manageAudioSession"] as? Bool ?? true
   }
+
 }
